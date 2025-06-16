@@ -1,22 +1,192 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <link rel="stylesheet" href="styles.css" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>PakePlus App</title>
-        <script type="module" src="/main.js" defer></script>
-    </head>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>WebView2 自适应页面示例</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <body>
-        <main class="container">
-            <h1>Welcome to PakePlus</h1>
+        /* 确保 html 和 body 占满整个视口 */
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
 
-            <form class="row" id="greet-form">
-                <input id="greet-input" placeholder="Enter a name..." />
-                <button type="submit">Greet</button>
-            </form>
-            <p id="greet-msg"></p>
+        /* 主容器 */
+        .container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        /* 头部 */
+        .header {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        /* 内容卡片 */
+        .content-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* 信息面板 */
+        .info-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .info-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .info-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        /* 底部 */
+        .footer {
+            padding: 15px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.2);
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .content-card {
+                padding: 20px;
+            }
+            
+            .info-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 按钮样式 */
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>WebView2 自适应页面</h1>
+            <p>这个页面会自动适应你的 EXE 窗口大小</p>
+        </header>
+
+        <main class="main-content">
+            <div class="content-card">
+                <h2>欢迎使用 WebView2</h2>
+                <p style="margin-top: 20px; line-height: 1.6;">
+                    这是一个完全响应式的 HTML 页面示例，它会根据 WebView2 控件的大小自动调整布局。
+                    无论你的 EXE 窗口是什么尺寸，页面内容都会完美适配。
+                </p>
+
+                <div class="info-panel">
+                    <div class="info-item">
+                        <div>窗口宽度</div>
+                        <div class="info-value" id="width">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div>窗口高度</div>
+                        <div class="info-value" id="height">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div>设备像素比</div>
+                        <div class="info-value" id="dpr">-</div>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="testResize()">测试响应式布局</button>
+            </div>
         </main>
-    </body>
+
+        <footer class="footer">
+            <p>© 2025 WebView2 示例 | 窗口大小会实时更新</p>
+        </footer>
+    </div>
+
+    <script>
+        // 更新窗口尺寸信息
+        function updateWindowSize() {
+            document.getElementById('width').textContent = window.innerWidth + 'px';
+            document.getElementById('height').textContent = window.innerHeight + 'px';
+            document.getElementById('dpr').textContent = window.devicePixelRatio.toFixed(2);
+        }
+
+        // 测试响应式布局
+        function testResize() {
+            alert(`当前窗口大小：${window.innerWidth} x ${window.innerHeight}\n请尝试调整 EXE 窗口大小，页面会自动适应！`);
+        }
+
+        // 初始化显示
+        updateWindowSize();
+
+        // 监听窗口大小变化
+        window.addEventListener('resize', updateWindowSize);
+
+        // 与 C# 通信示例（如果需要）
+        // window.chrome.webview.postMessage("页面已加载");
+        
+        // 监听来自 C# 的消息（如果需要）
+        // window.chrome.webview.addEventListener('message', event => {
+        //     console.log('收到消息:', event.data);
+        // });
+    </script>
+</body>
 </html>
